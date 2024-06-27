@@ -17,6 +17,7 @@ public class ApiController : ControllerBase
         _logger = logger;
         _applicationDbContext = applicationDbContext;
     }
+    
     [HttpGet]
     [Route("Get/Machinery/Categories")]
     public async Task<IActionResult> GetMachineryCategories(){
