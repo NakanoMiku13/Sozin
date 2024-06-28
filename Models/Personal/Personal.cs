@@ -7,5 +7,6 @@ public class Personal{
     public double Longitude {get; set;}
     public string Schedule {get; set;}
     public bool Available {get; set;}
+    public string Type {get; set;}
     public bool Operative {get; set;}
 }
