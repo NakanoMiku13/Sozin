@@ -4517,19 +4517,19 @@
     ]
   },
   "packageFolders": {
-    "/home/miku/.nuget/packages/": {}
+    "/home/daniel/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/mnt/ssd1tb/Codigos/Sozin/SozinBackNew/SozinBackNew.csproj",
+      "projectUniqueName": "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj",
       "projectName": "SozinBackNew",
-      "projectPath": "/mnt/ssd1tb/Codigos/Sozin/SozinBackNew/SozinBackNew.csproj",
-      "packagesPath": "/home/miku/.nuget/packages/",
-      "outputPath": "/mnt/ssd1tb/Codigos/Sozin/SozinBackNew/obj/",
+      "projectPath": "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj",
+      "packagesPath": "/home/daniel/.nuget/packages/",
+      "outputPath": "/home/daniel/Codigos/C#/Sozin/test/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/miku/.nuget/NuGet/NuGet.Config"
+        "/home/daniel/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"

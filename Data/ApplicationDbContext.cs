@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SozinBackNew.Models.Material;
 using SozinBackNew.Models.Machinery;
+using SozinBackNew.Models.Personal;
 using SozinBackNew.Models;
 namespace SozinBackNew.Data
 {
@@ -22,6 +23,8 @@ namespace SozinBackNew.Data
         public DbSet<SozinBackNew.Models.Machinery.Category> MachineryCategories {get; set;}
         public DbSet<Machinery> Machineries {get; set;}
         public DbSet<MachineryIncident> MachineriesPerIncident {get; set;}
+        public DbSet<Personal> Personal {get; set;}
+        public DbSet<PersonalIncident> PersonalIncident {get; set;}
         
     }
 }

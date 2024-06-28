@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using SozinBackNew.Models.Machinery;
 using SozinBackNew.Models.Material;
+using SozinBackNew.Models.Personal;
 using SozinBackNew.Data;
 using Microsoft.EntityFrameworkCore;
 namespace SozinBackNew.Controllers;
@@ -66,6 +67,15 @@ public class ApiController : ControllerBase
         }
     }
     [HttpGet]
+    [Route("Get/Personal")]
+    public async Task<IActionResult> GetPersonal(){
+        try{
+            return Ok(await _applicationDbContext.Personal.ToListAsync());
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpGet]
     [Route("Get/Machineries")]
     public async Task<IActionResult> GetMachinery(){
         try{
@@ -79,6 +89,15 @@ public class ApiController : ControllerBase
     public async Task<IActionResult> GetMaterial(int id){
         try{
             return Ok(await _applicationDbContext.Materials.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id));
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpGet]
+    [Route("Get/Personal/By/Id")]
+    public async Task<IActionResult> GetPersonalById(int id){
+        try{
+            return Ok(await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == id));
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -164,6 +183,36 @@ public class ApiController : ControllerBase
         }
     }
     [HttpPost]
+    [Route("Set/Personal")]
+    public async Task<IActionResult> SetPersonal([FromBody] PersonalRequest personal){
+        try{
+            var personalOld = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Name.ToLower() == personal.Name.ToLower());
+            if (personalOld == null){
+                Personal newPersonal = new(){
+                    Name = personal.Name,
+                    Latitude = personal.Latitude,
+                    Longitude = personal.Longitude,
+                    Schedule = personal.Schedule,
+                    Available = personal.Available,
+                    Operative = personal.Operative
+                };
+                await _applicationDbContext.Personal.AddAsync(newPersonal);
+            }else{
+                personalOld.Name = personal.Name;
+                personalOld.Latitude = personal.Latitude;
+                personalOld.Longitude = personal.Longitude;
+                personalOld.Schedule = personal.Schedule;
+                personalOld.Available = personal.Available;
+                personalOld.Operative = personal.Operative;
+                _applicationDbContext.Personal.Update(personalOld);
+            }
+            await _applicationDbContext.SaveChangesAsync();
+            return Created();
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpPost]
     [Route("Set/Material")]
     public async Task<IActionResult> SetMaterial([FromBody] MaterialRequest Material){
         try{
@@ -213,6 +262,9 @@ public class ApiController : ControllerBase
             };
             await _applicationDbContext.MaterialsPerIncident.AddAsync(incidentMaterial);
             await _applicationDbContext.SaveChangesAsync();
+            material.Available = false;
+            _applicationDbContext.Materials.Update(material);
+            await _applicationDbContext.SaveChangesAsync();
             return Ok(incidentMaterial);
         }catch(Exception ex){
             return BadRequest(ex.Message);
@@ -252,6 +304,9 @@ public class ApiController : ControllerBase
             };
             await _applicationDbContext.MachineriesPerIncident.AddAsync(incidentMachinery);
             await _applicationDbContext.SaveChangesAsync();
+            Machinery.Available = false;
+            _applicationDbContext.Machineries.Update(Machinery);
+            await _applicationDbContext.SaveChangesAsync();
             return Ok(incidentMachinery);
         }catch(Exception ex){
             return BadRequest(ex.Message);
@@ -269,6 +324,9 @@ public class ApiController : ControllerBase
             if(incidentPrev == null) return BadRequest("Machinery not previously assigned");
             _applicationDbContext.MachineriesPerIncident.Remove(incidentPrev);
             await _applicationDbContext.SaveChangesAsync();
+            Machinery.Available = true;
+            _applicationDbContext.Machineries.Update(Machinery);
+            await _applicationDbContext.SaveChangesAsync();
             return Ok("Deassigned");
         }catch(Exception ex){
             return BadRequest(ex.Message);
@@ -285,6 +343,9 @@ public class ApiController : ControllerBase
             var incidentPrev = await _applicationDbContext.MaterialsPerIncident.Include(p => p.Material).FirstOrDefaultAsync(p => p.Material.Id == MaterialId && p.IncidentId == incidentId);
             if(incidentPrev == null) return BadRequest("Material not previously assigned");
             _applicationDbContext.MaterialsPerIncident.Remove(incidentPrev);
+            await _applicationDbContext.SaveChangesAsync();
+            Material.Available = false;
+            _applicationDbContext.Materials.Update(Material);
             await _applicationDbContext.SaveChangesAsync();
             return Ok("Deassigned");
         }catch(Exception ex){
@@ -326,6 +387,15 @@ public class MachineryRequest{
     public string Serial {get; set;}
     public bool Available {get; set;}
     public int CategoryId {get; set;}
+    public bool Operative {get; set;}
+}
+public class PersonalRequest{
+    public int? Id {get; set;}
+    public string Name {get; set;}
+    public double Latitude {get; set;}
+    public double Longitude {get; set;}
+    public string Schedule {get; set;}
+    public bool Available {get; set;}
     public bool Operative {get; set;}
 }
 public class MaterialRequest{
