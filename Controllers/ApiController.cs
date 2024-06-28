@@ -194,7 +194,8 @@ public class ApiController : ControllerBase
                     Longitude = personal.Longitude,
                     Schedule = personal.Schedule,
                     Available = personal.Available,
-                    Operative = personal.Operative
+                    Operative = personal.Operative,
+                    Type = personal.Type
                 };
                 await _applicationDbContext.Personal.AddAsync(newPersonal);
             }else{
@@ -204,6 +205,7 @@ public class ApiController : ControllerBase
                 personalOld.Schedule = personal.Schedule;
                 personalOld.Available = personal.Available;
                 personalOld.Operative = personal.Operative;
+                personalOld.Type = personal.Type;
                 _applicationDbContext.Personal.Update(personalOld);
             }
             await _applicationDbContext.SaveChangesAsync();
@@ -397,6 +399,7 @@ public class PersonalRequest{
     public string Schedule {get; set;}
     public bool Available {get; set;}
     public bool Operative {get; set;}
+    public string Type {get; set;}
 }
 public class MaterialRequest{
     public int? Id {get; set;}
