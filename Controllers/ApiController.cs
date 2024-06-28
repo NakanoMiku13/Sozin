@@ -278,7 +278,7 @@ public class ApiController : ControllerBase
         try{
             var material = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == personalId);
             if(material == null) return BadRequest("Material not found");
-            var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Material).FirstOrDefaultAsync(p => p.Material.Id == personalId);
+            var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Personal).FirstOrDefaultAsync(p => p.Personal.Id == personalId);
             if(incidentPrev != null) return BadRequest("Material previously assigned");
             var incident = await _applicationDbContext.incident.FirstOrDefaultAsync(p => p.Id == incidentId);
             if(incident == null) return BadRequest("Incident not found");
