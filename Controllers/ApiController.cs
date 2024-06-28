@@ -278,7 +278,7 @@ public class ApiController : ControllerBase
         try{
             var material = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == personalId);
             if(material == null) return BadRequest("Material not found");
-            var incidentPrev = await _applicationDbContext.PersonalPerIncident.Include(p => p.Material).FirstOrDefaultAsync(p => p.Material.Id == personalId);
+            var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Material).FirstOrDefaultAsync(p => p.Material.Id == personalId);
             if(incidentPrev != null) return BadRequest("Material previously assigned");
             var incident = await _applicationDbContext.incident.FirstOrDefaultAsync(p => p.Id == incidentId);
             if(incident == null) return BadRequest("Incident not found");
@@ -286,7 +286,7 @@ public class ApiController : ControllerBase
                 Personal = material,
                 IncidentId = incidentId
             };
-            await _applicationDbContext.PersonalPerIncident.AddAsync(incidentMaterial);
+            await _applicationDbContext.PersonalIncident.AddAsync(incidentMaterial);
             await _applicationDbContext.SaveChangesAsync();
             material.Available = false;
             _applicationDbContext.Personal.Update(material);
@@ -309,7 +309,7 @@ public class ApiController : ControllerBase
     [Route("Get/Assign/Personal/Incident")]
     public async Task<IActionResult> AssignedPersonal(int id){
         try{
-            return Ok(await _applicationDbContext.PersonalPerIncident.Include(p => p.Personal).Where(p => p.IncidentId == id).ToListAsync());
+            return Ok(await _applicationDbContext.PersonalIncident.Include(p => p.Personal).Where(p => p.IncidentId == id).ToListAsync());
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -375,9 +375,9 @@ public class ApiController : ControllerBase
             if(incident == null) return BadRequest("Incident not found");
             var Machinery = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == PersonalId);
             if(Machinery == null) return BadRequest("Machinery not found");
-            var incidentPrev = await _applicationDbContext.PersonalPerIncident.Include(p => p.Personal).FirstOrDefaultAsync(p => p.Personal.Id == PersonalId && p.IncidentId == incidentId);
+            var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Personal).FirstOrDefaultAsync(p => p.Personal.Id == PersonalId && p.IncidentId == incidentId);
             if(incidentPrev == null) return BadRequest("Machinery not previously assigned");
-            _applicationDbContext.PersonalPerIncident.Remove(incidentPrev);
+            _applicationDbContext.PersonalIncident.Remove(incidentPrev);
             await _applicationDbContext.SaveChangesAsync();
             Machinery.Available = true;
             _applicationDbContext.Personal.Update(Machinery);
