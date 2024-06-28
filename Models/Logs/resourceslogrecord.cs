@@ -1,7 +1,7 @@
 using System;
 using SozinBackNew.Models.Logs;
 namespace SozinBackNew.Models.Logs;
-public class resourceslog{
+public class resourceslogrecord{
     public int id {get; set;}
     public int original_record {get; set;}
     public string name {get; set;}
