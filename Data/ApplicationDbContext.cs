@@ -26,6 +26,6 @@ namespace SozinBackNew.Data
         public DbSet<MachineryIncident> MachineriesPerIncident {get; set;}
         public DbSet<Personal> Personal {get; set;}
         public DbSet<PersonalIncident> PersonalIncident {get; set;}
-        public DbSet<UserApp> Users {get; set;}
+        public DbSet<UserApp> UsersApp {get; set;}
     }
 }

@@ -23,7 +23,7 @@ public class ApiController : ControllerBase
     [Route("Get/Commanders")]
     public async Task<IActionResult> GetCommanders(){
         try{
-            return Ok(await _applicationDbContext.Users.Where(p => p.Role == "Commander").ToListAsync());
+            return Ok(await _applicationDbContext.UsersApp.Where(p => p.Role == "Commander").ToListAsync());
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -32,11 +32,12 @@ public class ApiController : ControllerBase
     [Route("Set/User")]
     public async Task<IActionResult> SetUser([FromBody] UserApp user){
         try{
-            var userFound = await _applicationDbContext.Users.FirstOrDefaultAsync(p => p.Username.ToLower() == user.Username.ToLower());
+            var userFound = await _applicationDbContext.UsersApp.FirstOrDefaultAsync(p => p.Username.ToLower() == user.Username.ToLower());
             if(userFound != null) return BadRequest("User already created");
-            await _applicationDbContext.Users.AddAsync(userFound);
+            await _applicationDbContext.UsersApp.AddAsync(user);
+            Console.WriteLine("Hi");
             await _applicationDbContext.SaveChangesAsync();
-            return Created();
+            return CreatedAtAction(nameof(SetUser), new { id = user.Id }, user);
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -45,7 +46,7 @@ public class ApiController : ControllerBase
     [Route("Login")]
     public async Task<IActionResult> Login(string username, string password){
         try{
-            var user = await _applicationDbContext.Users.FirstOrDefaultAsync(p => p.Username.ToLower() == username.ToLower() && p.Password == password);
+            var user = await _applicationDbContext.UsersApp.FirstOrDefaultAsync(p => p.Username.ToLower() == username.ToLower() && p.Password == password);
             return user != null ? Ok(user) : BadRequest("Wrong password or wrong username");
         }catch(Exception ex){
             return BadRequest(ex.Message);
