@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj": {}
+    "/home/user/Sozin/test/SozinBackNew.csproj": {}
   },
   "projects": {
-    "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj": {
+    "/home/user/Sozin/test/SozinBackNew.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj",
+        "projectUniqueName": "/home/user/Sozin/test/SozinBackNew.csproj",
         "projectName": "SozinBackNew",
-        "projectPath": "/home/daniel/Codigos/C#/Sozin/test/SozinBackNew.csproj",
-        "packagesPath": "/home/daniel/.nuget/packages/",
-        "outputPath": "/home/daniel/Codigos/C#/Sozin/test/obj/",
+        "projectPath": "/home/user/Sozin/test/SozinBackNew.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Sozin/test/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/daniel/.nuget/NuGet/NuGet.Config"
+          "/home/user/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
