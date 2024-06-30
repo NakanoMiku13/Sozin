@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SozinBackNew.Models.Machinery;
 using SozinBackNew.Models.Material;
 using SozinBackNew.Models.Personal;
+using SozinBackNew.Models.Users;
 using SozinBackNew.Data;
 using Microsoft.EntityFrameworkCore;
 namespace SozinBackNew.Controllers;
@@ -18,7 +19,38 @@ public class ApiController : ControllerBase
         _logger = logger;
         _applicationDbContext = applicationDbContext;
     }
-    
+    [HttpGet]
+    [Route("Get/Commanders")]
+    public async Task<IActionResult> GetCommanders(){
+        try{
+            return Ok(await _applicationDbContext.Users.Where(p => p.Role == "Commander").ToListAsync());
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpPost]
+    [Route("Set/User")]
+    public async Task<IActionResult> SetUser([FromBody] User user){
+        try{
+            var userFound = await _applicationDbContext.Users.FirstOrDefaultAsync(p => p.Username.ToLower() == user.Username.ToLower());
+            if(userFound != null) return BadRequest("User already created");
+            await _applicationDbContext.Users.AddAsync(userFound);
+            await _applicationDbContext.SaveChangesAsync();
+            return Created();
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpGet]
+    [Route("Login")]
+    public async Task<IActionResult> Login(string username, string password){
+        try{
+            var user = await _applicationDbContext.Users.FirstOrDefaultAsync(p => p.Username.ToLower() == username.ToLower() && p.Password == password);
+            return user != null ? Ok(user) : BadRequest("Wrong password or wrong username");
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
     [HttpGet]
     [Route("Get/Machinery/Categories")]
     public async Task<IActionResult> GetMachineryCategories(){

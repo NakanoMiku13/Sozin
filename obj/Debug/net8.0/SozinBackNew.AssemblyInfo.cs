@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SozinBackNew")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8611ebf4bc5c9d97b46e2f5c1b47fa1b838a4eb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9b88b20382ac599da6503d042263c063e18dc489")]
 [assembly: System.Reflection.AssemblyProductAttribute("SozinBackNew")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SozinBackNew")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

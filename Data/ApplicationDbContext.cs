@@ -8,6 +8,7 @@ using SozinBackNew.Models.Material;
 using SozinBackNew.Models.Machinery;
 using SozinBackNew.Models.Personal;
 using SozinBackNew.Models;
+using SozinBackNew.Models.Users;
 namespace SozinBackNew.Data
 {
     public class ApplicationDbContext : DbContext
@@ -25,6 +26,6 @@ namespace SozinBackNew.Data
         public DbSet<MachineryIncident> MachineriesPerIncident {get; set;}
         public DbSet<Personal> Personal {get; set;}
         public DbSet<PersonalIncident> PersonalIncident {get; set;}
-        
+        public DbSet<User> Users {get; set;}
     }
 }
