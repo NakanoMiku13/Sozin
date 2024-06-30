@@ -30,7 +30,7 @@ public class ApiController : ControllerBase
     }
     [HttpPost]
     [Route("Set/User")]
-    public async Task<IActionResult> SetUser([FromBody] SozinBackNew.Models.Users.User user){
+    public async Task<IActionResult> SetUser([FromBody] UserApp user){
         try{
             var userFound = await _applicationDbContext.Users.FirstOrDefaultAsync(p => p.Username.ToLower() == user.Username.ToLower());
             if(userFound != null) return BadRequest("User already created");

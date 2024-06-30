@@ -1,6 +1,6 @@
 using System;
 namespace SozinBackNew.Models.Users;
-public class User{
+public class UserApp{
     public int? Id {get; set;}
     public string Name {get; set;}
     public string Role {get; set;}
