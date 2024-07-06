@@ -5,6 +5,7 @@ using SozinBackNew.Models.Material;
 using SozinBackNew.Models.Personal;
 using SozinBackNew.Models.Users;
 using SozinBackNew.Data;
+using SozinBackNew.Models.Logs;
 using Microsoft.EntityFrameworkCore;
 namespace SozinBackNew.Controllers;
 [Route("v1/")]
@@ -24,6 +25,24 @@ public class ApiController : ControllerBase
     public async Task<IActionResult> GetCommanders(){
         try{
             return Ok(await _applicationDbContext.UsersApp.Where(p => p.Role == "Commander").ToListAsync());
+        }catch(Exception ex){
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpGet]
+    [Route("Get/Logs")]
+    public async Task<IActionResult> GetLogs(int incidentId){
+        try{
+            var lastOperaitonRecord = await _applicationDbContext.operationlog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            var lastResourceRecord = await _applicationDbContext.resourceslog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            var operationRecords = await _applicationDbContext.operationlogrecord.Where(p => p.incident_id == incidentId).OrderBy(p => p.date).ToListAsync();
+            var resourcesRecords = await _applicationDbContext.resourceslogrecord.Where(p => p.incident_id == incidentId).OrderBy(p => p.date).ToListAsync();
+            var result = new Dictionary<string, dynamic?>();
+            result.Add("Last Operation Record", lastOperaitonRecord);
+            result.Add("Last Resource Record", lastResourceRecord);
+            result.Add("Operation Records", operationRecords);
+            result.Add("Resources Records", resourcesRecords);
+            return Ok(result);
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -295,6 +314,33 @@ public class ApiController : ControllerBase
                 Material = material,
                 IncidentId = incidentId
             };
+            var prevLog = await _applicationDbContext.resourceslog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                resourceslog opLog = new(){
+                    name = "Asignación de material a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se asignó el material {material.Name} al incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslog.AddRangeAsync(opLog);
+            }else{
+                resourceslogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se asignó el material {material.Name} al incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.resourceslog.Update(prevLog);
+            }
+            await _applicationDbContext.SaveChangesAsync();
             await _applicationDbContext.MaterialsPerIncident.AddAsync(incidentMaterial);
             await _applicationDbContext.SaveChangesAsync();
             material.Available = false;
@@ -309,22 +355,50 @@ public class ApiController : ControllerBase
     [Route("Assign/Personal/Incident")]
     public async Task<IActionResult> AssignPersonal(int personalId, int incidentId){
         try{
-            var material = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == personalId);
-            if(material == null) return BadRequest("Material not found");
+            var Personal = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == personalId);
+            if(Personal == null) return BadRequest("Personal not found");
             var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Personal).FirstOrDefaultAsync(p => p.Personal.Id == personalId);
-            if(incidentPrev != null) return BadRequest("Material previously assigned");
+            if(incidentPrev != null) return BadRequest("Personal previously assigned");
             var incident = await _applicationDbContext.incident.FirstOrDefaultAsync(p => p.Id == incidentId);
             if(incident == null) return BadRequest("Incident not found");
-            PersonalIncident incidentMaterial = new(){
-                Personal = material,
+            PersonalIncident personalIncident = new(){
+                Personal = Personal,
                 IncidentId = incidentId
             };
-            await _applicationDbContext.PersonalIncident.AddAsync(incidentMaterial);
+            var prevLog = await _applicationDbContext.operationlog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                operationlog opLog = new(){
+                    name = "Asignación de personal a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se asignó el personal {Personal.Name} - {Personal.Type} al incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.operationlog.AddRangeAsync(opLog);
+            }else{
+                operationlogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.operationlogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se asignó el personal {Personal.Name} - {Personal.Type} al incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.operationlog.Update(prevLog);
+            }
             await _applicationDbContext.SaveChangesAsync();
-            material.Available = false;
-            _applicationDbContext.Personal.Update(material);
+            await _applicationDbContext.PersonalIncident.AddAsync(personalIncident);
             await _applicationDbContext.SaveChangesAsync();
-            return Ok(incidentMaterial);
+            Personal.Available = false;
+            _applicationDbContext.Personal.Update(Personal);
+            await _applicationDbContext.SaveChangesAsync();
+
+            return Ok(personalIncident);
         }catch(Exception ex){
             return BadRequest(ex.Message);
         }
@@ -370,6 +444,33 @@ public class ApiController : ControllerBase
                 Machinery = Machinery,
                 IncidentId = incidentId
             };
+            var prevLog = await _applicationDbContext.resourceslog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                resourceslog opLog = new(){
+                    name = "Asignación de maquinaria a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se asignó la maquinaria {Machinery.Name} al incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslog.AddRangeAsync(opLog);
+            }else{
+                resourceslogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se asignó la maquinaria {Machinery.Name} al incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.resourceslog.Update(prevLog);
+            }
+            await _applicationDbContext.SaveChangesAsync();
             await _applicationDbContext.MachineriesPerIncident.AddAsync(incidentMachinery);
             await _applicationDbContext.SaveChangesAsync();
             Machinery.Available = false;
@@ -395,6 +496,33 @@ public class ApiController : ControllerBase
             Machinery.Available = true;
             _applicationDbContext.Machineries.Update(Machinery);
             await _applicationDbContext.SaveChangesAsync();
+            var prevLog = await _applicationDbContext.resourceslog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                resourceslog opLog = new(){
+                    name = "Desasignación de maquinaria a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se removió la maquinaria {Machinery.Name} del incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslog.AddRangeAsync(opLog);
+            }else{
+                resourceslogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se removió la maquinaria {Machinery.Name} del incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.resourceslog.Update(prevLog);
+            }
+            await _applicationDbContext.SaveChangesAsync();
             return Ok("Deassigned");
         }catch(Exception ex){
             return BadRequest(ex.Message);
@@ -406,14 +534,41 @@ public class ApiController : ControllerBase
         try{
             var incident = await _applicationDbContext.incident.FirstOrDefaultAsync(p => p.Id == incidentId);
             if(incident == null) return BadRequest("Incident not found");
-            var Machinery = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == PersonalId);
-            if(Machinery == null) return BadRequest("Machinery not found");
+            var Personal = await _applicationDbContext.Personal.FirstOrDefaultAsync(p => p.Id == PersonalId);
+            if(Personal == null) return BadRequest("Personal not found");
             var incidentPrev = await _applicationDbContext.PersonalIncident.Include(p => p.Personal).FirstOrDefaultAsync(p => p.Personal.Id == PersonalId && p.IncidentId == incidentId);
-            if(incidentPrev == null) return BadRequest("Machinery not previously assigned");
+            if(incidentPrev == null) return BadRequest("Personal not previously assigned");
             _applicationDbContext.PersonalIncident.Remove(incidentPrev);
             await _applicationDbContext.SaveChangesAsync();
-            Machinery.Available = true;
-            _applicationDbContext.Personal.Update(Machinery);
+            Personal.Available = true;
+            _applicationDbContext.Personal.Update(Personal);
+            await _applicationDbContext.SaveChangesAsync();
+            var prevLog = await _applicationDbContext.operationlog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                operationlog opLog = new(){
+                    name = "Desasignación de personal a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se removió el personal {Personal.Name} - {Personal.Type} del incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.operationlog.AddRangeAsync(opLog);
+            }else{
+                operationlogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.operationlogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se removió el personal {Personal.Name} - {Personal.Type} del incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.operationlog.Update(prevLog);
+            }
             await _applicationDbContext.SaveChangesAsync();
             return Ok("Deassigned");
         }catch(Exception ex){
@@ -434,6 +589,33 @@ public class ApiController : ControllerBase
             await _applicationDbContext.SaveChangesAsync();
             Material.Available = false;
             _applicationDbContext.Materials.Update(Material);
+            await _applicationDbContext.SaveChangesAsync();
+            var prevLog = await _applicationDbContext.resourceslog.FirstOrDefaultAsync(p => p.incident_id == incidentId);
+            if(prevLog == null){
+                resourceslog opLog = new(){
+                    name = "Desasignación de material a incidente",
+                    date = DateTime.Now,
+                    notes = $"Se removió el material {Material.Name} del incidente {incident.Id} - {incident.Name}",
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslog.AddRangeAsync(opLog);
+            }else{
+                resourceslogrecord opLog = new(){
+                    name = prevLog.name,
+                    date = prevLog.date,
+                    original_record = prevLog.id,
+                    notes = prevLog.notes,
+                    incident_id = incident.Id,
+                    person_id = incident.Command_Id
+                };
+                await _applicationDbContext.resourceslogrecord.AddAsync(opLog);
+                await _applicationDbContext.SaveChangesAsync();
+                prevLog.name = "Actualización log";
+                prevLog.date = DateTime.Now;
+                prevLog.notes = $"Actualización de bitácora: Se removió el material {Material.Name} del incidente {incident.Id} - {incident.Name}";
+                _applicationDbContext.resourceslog.Update(prevLog);
+            }
             await _applicationDbContext.SaveChangesAsync();
             return Ok("Deassigned");
         }catch(Exception ex){

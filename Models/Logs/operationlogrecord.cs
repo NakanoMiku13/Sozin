@@ -9,7 +9,7 @@ public class operationlogrecord{
     public string notes {get; set;}
     public int incident_id {get; set;}
     public int person_id {get; set;}
-    public string assigned_tasks {get; set;}
-    public int worked_hours {get; set;}
-    public int crew_id {get; set;}
+    public string assigned_tasks {get; set;} = "Nothing";
+    public int worked_hours {get; set;} = 0;
+    public int crew_id {get; set;} = 1;
 }

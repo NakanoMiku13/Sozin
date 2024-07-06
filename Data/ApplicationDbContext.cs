@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using SozinBackNew.Models.Material;
 using SozinBackNew.Models.Machinery;
 using SozinBackNew.Models.Personal;
+using SozinBackNew.Models.Logs;
 using SozinBackNew.Models;
 using SozinBackNew.Models.Users;
 namespace SozinBackNew.Data
@@ -27,5 +28,9 @@ namespace SozinBackNew.Data
         public DbSet<Personal> Personal {get; set;}
         public DbSet<PersonalIncident> PersonalIncident {get; set;}
         public DbSet<UserApp> UsersApp {get; set;}
+        public DbSet<operationlog> operationlog {get; set;}
+        public DbSet<operationlogrecord> operationlogrecord {get; set;}
+        public DbSet<resourceslog> resourceslog {get; set;}
+        public DbSet<resourceslogrecord> resourceslogrecord {get; set;}
     }
 }
