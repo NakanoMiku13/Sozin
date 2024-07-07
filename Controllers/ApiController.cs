@@ -203,7 +203,7 @@ public class ApiController : ControllerBase
     [Route("Set/Machinery")]
     public async Task<IActionResult> SetMachinery([FromBody] MachineryRequest machinery){
         try{
-            var machineryOld = await _applicationDbContext.Machineries.FirstOrDefaultAsync(p => p.Name.ToLower() == machinery.Name.ToLower());
+            var machineryOld = await _applicationDbContext.Machineries.FirstOrDefaultAsync(p => p.Serial == machinery.Serial);
             Console.WriteLine(machinery.CategoryId);
             var category = await _applicationDbContext.MachineryCategories.FirstOrDefaultAsync(p => p.Id == machinery.CategoryId);
             if(category == null) return BadRequest("No category found");
@@ -270,7 +270,7 @@ public class ApiController : ControllerBase
     [Route("Set/Material")]
     public async Task<IActionResult> SetMaterial([FromBody] MaterialRequest Material){
         try{
-            var MaterialOld = await _applicationDbContext.Materials.FirstOrDefaultAsync(p => p.Name.ToLower() == Material.Name.ToLower());
+            var MaterialOld = await _applicationDbContext.Materials.FirstOrDefaultAsync(p => p.Serial == Material.Serial);
             var category = await _applicationDbContext.MaterialCategories.FirstOrDefaultAsync(p => p.Id == Material.CategoryId);
             if(category == null) return BadRequest("No category found");
             if (MaterialOld == null){
